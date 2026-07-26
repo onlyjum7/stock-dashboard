@@ -1,0 +1,155 @@
+{
+  "generated_at": "2026-07-27T00:13:41+09:00",
+  "source": "Yahoo Finance (약 15~20분 지연)",
+  "portfolio": {
+    "positions": [
+      {
+        "name": "삼성전자",
+        "ticker": "005930.KS",
+        "qty": 1,
+        "avg": 78000,
+        "price": 249500.0,
+        "pct": -7.59,
+        "cost": 78000,
+        "value": 249500,
+        "pnl": 171500,
+        "pnl_pct": 219.87
+      },
+      {
+        "name": "SK하이닉스",
+        "ticker": "000660.KS",
+        "qty": 1,
+        "avg": 210000,
+        "price": 1759000.0,
+        "pct": -8.34,
+        "cost": 210000,
+        "value": 1759000,
+        "pnl": 1549000,
+        "pnl_pct": 737.62
+      },
+      {
+        "name": "한화에어로스페이스",
+        "ticker": "012450.KS",
+        "qty": 1,
+        "avg": 640000,
+        "price": 979000.0,
+        "pct": 2.19,
+        "cost": 640000,
+        "value": 979000,
+        "pnl": 339000,
+        "pnl_pct": 52.97
+      }
+    ],
+    "total_cost": 928000,
+    "total_value": 2987500,
+    "total_pnl": 2059500,
+    "total_pnl_pct": 221.93
+  },
+  "watchlist": [
+    {
+      "name": "삼성전자",
+      "ticker": "005930.KS",
+      "price": 249500.0,
+      "prev": 270000.0,
+      "change": -20500.0,
+      "pct": -7.59
+    },
+    {
+      "name": "SK하이닉스",
+      "ticker": "000660.KS",
+      "price": 1759000.0,
+      "prev": 1919000.0,
+      "change": -160000.0,
+      "pct": -8.34
+    },
+    {
+      "name": "한화에어로스페이스",
+      "ticker": "012450.KS",
+      "price": 979000.0,
+      "prev": 958000.0,
+      "change": 21000.0,
+      "pct": 2.19
+    },
+    {
+      "name": "씨에스윈드",
+      "ticker": "112610.KS",
+      "price": 43200.0,
+      "prev": 44550.0,
+      "change": -1350.0,
+      "pct": -3.03
+    },
+    {
+      "name": "마이크론",
+      "ticker": "MU",
+      "price": 920.95,
+      "prev": 990.21,
+      "change": -69.26,
+      "pct": -6.99
+    }
+  ],
+  "macro": [
+    {
+      "name": "KOSPI",
+      "ticker": "^KS11",
+      "digits": 2,
+      "price": 6690.6201,
+      "prev": 7096.8901,
+      "change": -406.27,
+      "pct": -5.72
+    },
+    {
+      "name": "KOSDAQ",
+      "ticker": "^KQ11",
+      "digits": 2,
+      "price": 748.22,
+      "prev": 790.28,
+      "change": -42.0601,
+      "pct": -5.32
+    },
+    {
+      "name": "S&P 500",
+      "ticker": "^GSPC",
+      "digits": 2,
+      "price": 7411.98,
+      "prev": 7408.2998,
+      "change": 3.6802,
+      "pct": 0.05
+    },
+    {
+      "name": "나스닥",
+      "ticker": "^IXIC",
+      "digits": 2,
+      "price": 24975.8203,
+      "prev": 25137.6895,
+      "change": -161.8691,
+      "pct": -0.64
+    },
+    {
+      "name": "원/달러",
+      "ticker": "KRW=X",
+      "digits": 2,
+      "price": 1459.42,
+      "prev": 1474.04,
+      "change": -14.62,
+      "pct": -0.99
+    },
+    {
+      "name": "WTI 유가",
+      "ticker": "CL=F",
+      "digits": 2,
+      "price": 89.31,
+      "prev": 92.19,
+      "change": -2.88,
+      "pct": -3.12
+    },
+    {
+      "name": "달러인덱스",
+      "ticker": "DX-Y.NYB",
+      "digits": 2,
+      "price": 101.47,
+      "prev": 101.43,
+      "change": 0.04,
+      "pct": 0.04
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "_comment": "여기만 고치면 됨. avg=평균단가(원), qty=수량. 팔았으면 줄 삭제.",
+  "holdings": [
+    { "name": "삼성전자",         "ticker": "005930.KS", "qty": 1, "avg": 78000 },
+    { "name": "SK하이닉스",       "ticker": "000660.KS", "qty": 1, "avg": 210000 },
+    { "name": "한화에어로스페이스", "ticker": "012450.KS", "qty": 1, "avg": 640000 }
+  ],
+  "watchlist": [
+    { "name": "삼성전자",         "ticker": "005930.KS" },
+    { "name": "SK하이닉스",       "ticker": "000660.KS" },
+    { "name": "한화에어로스페이스", "ticker": "012450.KS" },
+    { "name": "씨에스윈드",        "ticker": "112610.KS" },
+    { "name": "마이크론",          "ticker": "MU" }
+  ],
+  "macro": [
+    { "name": "KOSPI",    "ticker": "^KS11",     "digits": 2 },
+    { "name": "KOSDAQ",   "ticker": "^KQ11",     "digits": 2 },
+    { "name": "S&P 500",  "ticker": "^GSPC",     "digits": 2 },
+    { "name": "나스닥",    "ticker": "^IXIC",     "digits": 2 },
+    { "name": "원/달러",   "ticker": "KRW=X",     "digits": 2 },
+    { "name": "WTI 유가",  "ticker": "CL=F",      "digits": 2 },
+    { "name": "달러인덱스", "ticker": "DX-Y.NYB",  "digits": 2 }
+  ]
+}

@@ -1,0 +1,43 @@
+name: 시세 갱신
+
+on:
+  schedule:
+    # cron은 UTC 기준. KST = UTC + 9시간.
+    - cron: "*/15 0-7 * * 1-5"   # 국내장 09:00~16:00 KST, 15분마다
+    - cron: "30 21 * * 1-5"      # 미국장 마감 직후 (06:30 KST)
+  workflow_dispatch:              # 버튼으로 수동 실행
+
+permissions:
+  contents: write
+
+concurrency:
+  group: market-update
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: 라이브러리 설치
+        run: pip install "yfinance>=0.2.55" "pandas>=2.2"
+
+      - name: 계산 로직 테스트
+        run: python scripts/test_fetch_market.py
+
+      - name: 시세 수집
+        run: python scripts/fetch_market.py
+
+      - name: 변경분 커밋
+        run: |
+          git config user.name "market-bot"
+          git config user.email "market-bot@users.noreply.github.com"
+          git add data/market.json
+          git diff --staged --quiet || git commit -m "시세 갱신 $(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M KST')"
+          git push
