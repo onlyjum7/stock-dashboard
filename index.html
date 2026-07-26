@@ -39,42 +39,23 @@ h2{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute
    font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:10px}
 h2::after{content:"";flex:1;height:1px;background:var(--line)}
 
-/* 히어로 */
-.hero{background:var(--panel);border:1px solid var(--line);border-radius:14px;
-      padding:24px 22px;margin-top:22px}
-.hero-label{font-size:12px;color:var(--muted);letter-spacing:.08em}
-.hero-value{font-family:var(--mono);font-size:clamp(32px,8vw,54px);font-weight:700;
-  line-height:1.05;margin:6px 0 2px;letter-spacing:-.02em}
-.hero-sub{font-family:var(--mono);font-size:15px;font-weight:700}
-.gauge{margin-top:18px}
-.gauge-track{position:relative;height:26px;background:var(--panel-2);
-  border-radius:4px;overflow:hidden;border:1px solid var(--line)}
-.gauge-cost{position:absolute;inset:0 auto 0 0;background:#2C3546}
-.gauge-val{position:absolute;inset:0 auto 0 0;opacity:.85}
-.gauge-mark{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--amber)}
-.gauge-legend{display:flex;justify-content:space-between;margin-top:7px;
-  font-family:var(--mono);font-size:11px;color:var(--muted)}
-
-/* 테이블 */
-table{width:100%;border-collapse:collapse}
-th{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
-   text-align:right;padding:0 10px 8px;font-weight:700}
-th:first-child{text-align:left}
-td{padding:11px 10px;border-top:1px solid var(--line);text-align:right;font-size:14px}
-td:first-child{text-align:left}
-tbody tr:hover{background:var(--panel)}
 .nm{font-weight:600}
 .tk{font-family:var(--mono);font-size:11px;color:var(--muted);display:block;margin-top:2px}
-.scroll{overflow-x:auto;background:var(--panel);border:1px solid var(--line);
-  border-radius:14px;padding:16px 6px 6px}
 
-/* 매크로 스트립 */
-.macro{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:1px;
-  background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-.macro div{background:var(--panel);padding:14px 14px 12px}
-.macro .k{font-size:11px;color:var(--muted);letter-spacing:.06em}
-.macro .v{font-family:var(--mono);font-size:19px;font-weight:700;margin-top:4px}
-.macro .c{font-family:var(--mono);font-size:12px;margin-top:2px}
+/* 종목/매크로 차트 카드 */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.stock-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  padding:16px 16px 12px}
+.stock-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.stock-metrics{text-align:right;display:flex;flex-direction:column;gap:2px}
+.stock-metrics .num{font-size:15px}
+.stock-metrics .pnl{font-size:12px}
+.chart{margin-top:12px}
+.spark{width:100%;height:64px;display:block}
+.spark-range{display:flex;justify-content:space-between;margin-top:4px;
+  font-family:var(--mono);font-size:10px;color:var(--muted)}
+.chart-empty{height:64px;display:flex;align-items:center;justify-content:center;
+  color:var(--muted);font-size:12px}
 
 /* paperbot */
 .bot{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
@@ -88,7 +69,7 @@ footer{margin-top:32px;font-size:11px;color:var(--muted);line-height:1.7;
 .err{color:var(--amber);font-family:var(--mono);font-size:13px;padding:16px;
   background:var(--panel);border:1px solid var(--line);border-radius:14px}
 @media (prefers-reduced-motion:no-preference){
-  .hero,.scroll,.macro,.bot{animation:rise .4s ease both}
+  .stock-card,.bot{animation:rise .4s ease both}
   @keyframes rise{from{opacity:0;transform:translateY(6px)}}
 }
 </style>
@@ -127,41 +108,55 @@ function stamp(iso) {
     `<span class="dot"></span>${t.toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})} 기준 · ${ago} 갱신`;
 }
 
-function positions(rows) {
-  if (!rows.length) return '';
-  const tr = rows.map(r => `<tr>
-    <td><span class="nm">${esc(r.name)}</span><span class="tk">${esc(r.ticker)}</span></td>
-    <td class="num">${fmtPrice(r.avg, r.ticker)}</td>
-    <td class="num">${fmtPrice(r.price, r.ticker)}</td>
-    <td class="num ${cls(r.pct)}">${sign(r.pct)}%</td>
-    <td class="num ${cls(r.pnl_pct)}">${sign(r.pnl_pct)}%</td>
-  </tr>`).join('');
-  return `<section><h2>보유 종목</h2><div class="scroll"><table>
-    <thead><tr><th>종목</th><th>평단</th><th>현재가</th><th>전일비</th><th>수익률</th></tr></thead>
-    <tbody>${tr}</tbody></table></div></section>`;
+function sparkline(history) {
+  if (!history || history.length < 2) return '<div class="chart-empty">차트 데이터 없음</div>';
+  const w = 320, h = 64, pad = 4;
+  const closes = history.map(d => d.close);
+  const min = Math.min(...closes), max = Math.max(...closes);
+  const range = (max - min) || 1;
+  const stepX = (w - pad * 2) / (closes.length - 1);
+  const points = closes.map((c, i) => {
+    const x = pad + i * stepX;
+    const y = pad + (1 - (c - min) / range) * (h - pad * 2);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ');
+  const up = closes[closes.length - 1] >= closes[0];
+  const color = up ? 'var(--up)' : 'var(--down)';
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+      <polyline points="${points}" fill="none" stroke="${color}" stroke-width="2"/>
+    </svg>
+    <div class="spark-range"><span>${esc(history[0].date)}</span><span>${esc(history[history.length - 1].date)}</span></div>`;
 }
 
-function watchlist(rows) {
+function positions(rows) {
   if (!rows.length) return '';
-  const tr = rows.map(r => `<tr>
-    <td><span class="nm">${esc(r.name)}</span><span class="tk">${esc(r.ticker)}</span></td>
-    <td class="num">${fmtPrice(r.price, r.ticker)}</td>
-    <td class="num ${cls(r.change)}">${r.change >= 0 ? '+' : ''}${fmtPrice(r.change, r.ticker)}</td>
-    <td class="num ${cls(r.pct)}">${sign(r.pct)}%</td>
-  </tr>`).join('');
-  return `<section><h2>관심 종목</h2><div class="scroll"><table>
-    <thead><tr><th>종목</th><th>현재가</th><th>전일비</th><th>등락률</th></tr></thead>
-    <tbody>${tr}</tbody></table></div></section>`;
+  const cards = rows.map(r => `<div class="stock-card">
+    <div class="stock-head">
+      <div><span class="nm">${esc(r.name)}</span><span class="tk">${esc(r.ticker)}</span></div>
+      <div class="stock-metrics">
+        <span class="num">${fmtPrice(r.price, r.ticker)}</span>
+        <span class="num ${cls(r.pct)}">${sign(r.pct)}%</span>
+        <span class="num pnl ${cls(r.pnl_pct)}">수익률 ${sign(r.pnl_pct)}%</span>
+      </div>
+    </div>
+    <div class="chart">${sparkline(r.history)}</div>
+  </div>`).join('');
+  return `<section><h2>보유 종목</h2><div class="cards">${cards}</div></section>`;
 }
 
 function macro(rows) {
   if (!rows.length) return '';
-  const cards = rows.map(r => `<div>
-    <div class="k">${esc(r.name)}</div>
-    <div class="v">${r.price.toLocaleString('ko-KR',{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
-    <div class="c ${cls(r.pct)}">${sign(r.pct)}%</div>
+  const cards = rows.map(r => `<div class="stock-card">
+    <div class="stock-head">
+      <div><span class="nm">${esc(r.name)}</span></div>
+      <div class="stock-metrics">
+        <span class="num">${r.price.toLocaleString('ko-KR',{minimumFractionDigits:2,maximumFractionDigits:2})}</span>
+        <span class="num ${cls(r.pct)}">${sign(r.pct)}%</span>
+      </div>
+    </div>
+    <div class="chart">${sparkline(r.history)}</div>
   </div>`).join('');
-  return `<section><h2>지수 · 환율 · 원자재</h2><div class="macro">${cards}</div></section>`;
+  return `<section><h2>지수 · 환율 · 원자재</h2><div class="cards">${cards}</div></section>`;
 }
 
 function bot(d) {
@@ -206,8 +201,7 @@ async function load() {
 
   stamp(m.generated_at);
   document.getElementById('root').innerHTML =
-    positions(m.portfolio.positions) +
-    watchlist(m.watchlist) + macro(m.macro) + bot(b);
+    positions(m.portfolio.positions) + macro(m.macro) + bot(b);
 }
 
 load();

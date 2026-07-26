@@ -1,16 +1,11 @@
 {
-  "_comment": "여기만 고치면 됨. avg=평균단가(원), qty=수량. 팔았으면 줄 삭제.",
+  "_comment": "qty는 공개 저장소라 실제 수량을 감추려 1로 고정. avg는 실제 1주당 평균단가(원화 종목은 원, 미국 종목은 달러)라 수익률(%)은 정확하다.",
   "holdings": [
-    { "name": "삼성전자",         "ticker": "005930.KS", "qty": 1, "avg": 78000 },
-    { "name": "SK하이닉스",       "ticker": "000660.KS", "qty": 1, "avg": 210000 },
-    { "name": "한화에어로스페이스", "ticker": "012450.KS", "qty": 1, "avg": 640000 }
-  ],
-  "watchlist": [
-    { "name": "삼성전자",         "ticker": "005930.KS" },
-    { "name": "SK하이닉스",       "ticker": "000660.KS" },
-    { "name": "한화에어로스페이스", "ticker": "012450.KS" },
-    { "name": "씨에스윈드",        "ticker": "112610.KS" },
-    { "name": "마이크론",          "ticker": "MU" }
+    { "name": "삼성전자",              "ticker": "005930.KS", "qty": 1, "avg": 310000 },
+    { "name": "TIGER 미국테크TOP10 INDXX", "ticker": "381170.KS", "qty": 1, "avg": 31643 },
+    { "name": "TIGER 미국AI빅테크10",   "ticker": "490090.KS", "qty": 1, "avg": 12105 },
+    { "name": "알파벳 A",              "ticker": "GOOGL",     "qty": 1, "avg": 384.29 },
+    { "name": "사운드하운드 AI",        "ticker": "SOUN",      "qty": 1, "avg": 16.28 }
   ],
   "macro": [
     { "name": "KOSPI",    "ticker": "^KS11",     "digits": 2 },

@@ -20,7 +20,7 @@ def load_config(path: Path = CONFIG_PATH) -> dict:
 
 def collect_tickers(config: dict) -> list[str]:
     tickers: list[str] = []
-    for section in ("holdings", "watchlist", "macro"):
+    for section in ("holdings", "macro"):
         for row in config.get(section, []):
             if row["ticker"] not in tickers:
                 tickers.append(row["ticker"])
@@ -28,7 +28,7 @@ def collect_tickers(config: dict) -> list[str]:
 
 
 def extract_quotes(frame, tickers: list[str]) -> dict[str, dict]:
-    """일봉 프레임에서 티커별 최신 종가와 직전 종가를 뽑는다."""
+    """일봉 프레임에서 티커별 최신 종가·직전 종가·차트용 일별 히스토리를 뽑는다."""
     quotes: dict[str, dict] = {}
     for ticker in tickers:
         try:
@@ -41,11 +41,19 @@ def extract_quotes(frame, tickers: list[str]) -> dict[str, dict]:
         prev = float(closes.iloc[-2]) if len(closes) >= 2 else last
         change = last - prev
         pct = (change / prev * 100) if prev else 0.0
+        history = [
+            {
+                "date": ts.strftime("%Y-%m-%d") if hasattr(ts, "strftime") else str(ts),
+                "close": round(float(v), 4),
+            }
+            for ts, v in closes.items()
+        ]
         quotes[ticker] = {
             "price": round(last, 4),
             "prev": round(prev, 4),
             "change": round(change, 4),
             "pct": round(pct, 2),
+            "history": history,
         }
     return quotes
 
@@ -74,6 +82,7 @@ def build_payload(config: dict, quotes: dict[str, dict]) -> dict:
             "value": round(value),
             "pnl": round(value - cost),
             "pnl_pct": round((value - cost) / cost * 100, 2) if cost else 0.0,
+            "history": quote["history"],
         })
 
     def decorate(section: str) -> list[dict]:
@@ -95,7 +104,6 @@ def build_payload(config: dict, quotes: dict[str, dict]) -> dict:
             "total_pnl": round(total_value - total_cost),
             "total_pnl_pct": round((total_value - total_cost) / total_cost * 100, 2) if total_cost else 0.0,
         },
-        "watchlist": decorate("watchlist"),
         "macro": decorate("macro"),
     }
 
@@ -108,7 +116,7 @@ def main() -> int:
 
     frame = yf.download(
         tickers=tickers,
-        period="10d",
+        period="6mo",
         interval="1d",
         group_by="ticker",
         auto_adjust=False,

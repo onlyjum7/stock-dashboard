@@ -74,7 +74,7 @@ def main():
     print("[4] 실제 설정 파일 파싱")
     real = load_config(Path(__file__).resolve().parent.parent / "config" / "holdings.json")
     check("티커 중복 제거", len(collect_tickers(real)), len(set(collect_tickers(real))))
-    check("보유종목 3개", len(real["holdings"]), 3)
+    check("보유종목 5개", len(real["holdings"]), 5)
 
     print(f"\n결과: {PASS} 통과 / {FAIL} 실패")
     return 1 if FAIL else 0
