@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import json
 import sys
-from datetime import datetime, timedelta, timezone
+from collections import OrderedDict
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -58,7 +59,44 @@ def extract_quotes(frame, tickers: list[str]) -> dict[str, dict]:
     return quotes
 
 
-def build_payload(config: dict, quotes: dict[str, dict]) -> dict:
+def extract_history(frame, tickers: list[str], fmt: str) -> dict[str, list[dict]]:
+    """일봉이 아닌 다른 간격(분봉 등)의 프레임에서 날짜/종가 배열만 뽑는다."""
+    out: dict[str, list[dict]] = {}
+    for ticker in tickers:
+        try:
+            closes = frame[ticker]["Close"].dropna()
+        except (KeyError, TypeError):
+            continue
+        out[ticker] = [
+            {
+                "date": ts.strftime(fmt) if hasattr(ts, "strftime") else str(ts),
+                "close": round(float(v), 4),
+            }
+            for ts, v in closes.items()
+        ]
+    return out
+
+
+def resample_weekly(daily_history: list[dict]) -> list[dict]:
+    """일봉 히스토리를 주 단위 마지막 종가로 뭉친다. 날짜 형식이 아니면 원본을 그대로 둔다."""
+    weeks: OrderedDict[str, dict] = OrderedDict()
+    for point in daily_history:
+        try:
+            d = date.fromisoformat(point["date"])
+        except ValueError:
+            return daily_history
+        iso = d.isocalendar()
+        key = f"{iso.year}-W{iso.week:02d}"
+        weeks[key] = point
+    return list(weeks.values())
+
+
+def build_payload(
+    config: dict,
+    quotes: dict[str, dict],
+    minute_history: dict[str, list[dict]] | None = None,
+) -> dict:
+    minute_history = minute_history or {}
     positions = []
     total_cost = 0.0
     total_value = 0.0
@@ -82,16 +120,23 @@ def build_payload(config: dict, quotes: dict[str, dict]) -> dict:
             "value": round(value),
             "pnl": round(value - cost),
             "pnl_pct": round((value - cost) / cost * 100, 2) if cost else 0.0,
-            "history": quote["history"],
+            "chart": {
+                "daily": quote["history"],
+                "weekly": resample_weekly(quote["history"]),
+                "minute": minute_history.get(row["ticker"], []),
+            },
         })
 
-    def decorate(section: str) -> list[dict]:
+    def decorate(section: str, history_limit: int | None = None) -> list[dict]:
         out = []
         for row in config.get(section, []):
             quote = quotes.get(row["ticker"])
             if not quote:
                 continue
-            out.append({**row, **quote})
+            item = {**row, **quote}
+            if history_limit:
+                item["history"] = item["history"][-history_limit:]
+            out.append(item)
         return out
 
     return {
@@ -104,7 +149,7 @@ def build_payload(config: dict, quotes: dict[str, dict]) -> dict:
             "total_pnl": round(total_value - total_cost),
             "total_pnl_pct": round((total_value - total_cost) / total_cost * 100, 2) if total_cost else 0.0,
         },
-        "macro": decorate("macro"),
+        "macro": decorate("macro", history_limit=130),
     }
 
 
@@ -113,10 +158,11 @@ def main() -> int:
 
     config = load_config()
     tickers = collect_tickers(config)
+    holding_tickers = [row["ticker"] for row in config.get("holdings", [])]
 
     frame = yf.download(
         tickers=tickers,
-        period="6mo",
+        period="2y",
         interval="1d",
         group_by="ticker",
         auto_adjust=False,
@@ -129,7 +175,23 @@ def main() -> int:
         print(f"수집 실패: {len(quotes)}/{len(tickers)} 종목만 응답. 기존 파일 유지.", file=sys.stderr)
         return 1
 
-    payload = build_payload(config, quotes)
+    minute_history: dict[str, list[dict]] = {}
+    if holding_tickers:
+        try:
+            minute_frame = yf.download(
+                tickers=holding_tickers,
+                period="5d",
+                interval="15m",
+                group_by="ticker",
+                auto_adjust=False,
+                progress=False,
+                threads=True,
+            )
+            minute_history = extract_history(minute_frame, holding_tickers, "%Y-%m-%d %H:%M")
+        except Exception as exc:  # 분봉은 부가 기능이라 실패해도 전체를 막지 않는다.
+            print(f"분봉 수집 실패(무시하고 계속): {exc}", file=sys.stderr)
+
+    payload = build_payload(config, quotes, minute_history)
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     with OUTPUT_PATH.open("w", encoding="utf-8") as fp:
         json.dump(payload, fp, ensure_ascii=False, indent=2)
