@@ -83,7 +83,38 @@ h2::after{content:"";flex:1;height:1px;background:var(--line)}
 .bot-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:16px;margin-top:12px}
 .bot-grid .k{font-size:11px;color:var(--muted)}
 .bot-grid .v{font-family:var(--mono);font-size:22px;font-weight:700;margin-top:3px}
+.bot-sub{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:12px;
+  margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.bot-sub .k{font-size:11px;color:var(--muted)}
+.bot-sub .v{font-family:var(--mono);font-size:14px;margin-top:2px}
+.bot-chart{width:100%;height:130px;display:block;margin-top:6px}
+.bot-block{margin-top:20px;padding-top:14px;border-top:1px solid var(--line)}
+.bot-block h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--muted);font-weight:700;margin-bottom:10px}
+
+/* 청산 사유별 기여도 */
+.reason{display:grid;grid-template-columns:96px 108px 1fr 62px;align-items:center;
+  gap:10px;padding:5px 0;font-size:12px}
+.reason .rn{font-weight:600}
+.reason .rc{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap}
+.reason .bar{height:8px;background:var(--panel-2);border-radius:4px;position:relative}
+.reason .bar i{position:absolute;top:0;height:8px;border-radius:4px;display:block}
+.reason .rv{font-family:var(--mono);text-align:right}
+
+/* 최근 매매 */
+.trades{width:100%;border-collapse:collapse;font-size:12px}
+.trades td{padding:6px 4px;border-top:1px solid var(--line);white-space:nowrap}
+.trades tr:first-child td{border-top:none}
+.trades .t-num{font-family:var(--mono);text-align:right}
+.trades .t-why{color:var(--muted);width:99%}   /* 남는 가로폭을 흡수해 나머지 칸을 붙인다 */
+.trades .t-date,.trades .t-hold{font-family:var(--mono);color:var(--muted);font-size:11px}
+
 .stale{color:var(--amber);font-size:12px;font-family:var(--mono);margin-top:12px}
+@media (max-width:520px){
+  .reason{grid-template-columns:80px 1fr 58px}
+  .reason .rc{display:none}
+  .trades .t-hold{display:none}
+}
 
 footer{margin-top:32px;font-size:11px;color:var(--muted);line-height:1.7;
   border-top:1px solid var(--line);padding-top:14px}
@@ -256,21 +287,95 @@ function macro(rows) {
   return `<section><h2>지수 · 환율 · 원자재</h2><div class="cards">${cards}</div></section>`;
 }
 
+function equityChart(points) {
+  if (!points || points.length < 2) return '<div class="chart-empty">자산곡선 데이터 부족</div>';
+  const w = 720, h = 130, pad = 10;
+  const vals = points.map(p => p.close);
+  const min = Math.min(100, ...vals), max = Math.max(100, ...vals);
+  const range = (max - min) || 1;
+  const y = v => pad + (1 - (v - min) / range) * (h - pad * 2);
+  const stepX = (w - pad * 2) / (vals.length - 1);
+  const pts = vals.map((v, i) => `${(pad + i * stepX).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+  const last = vals[vals.length - 1];
+  const color = last >= 100 ? 'var(--up)' : 'var(--down)';
+  const base = y(100).toFixed(1);
+  return `<svg class="bot-chart" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+      <polygon points="${pad},${base} ${pts} ${w - pad},${base}" fill="${color}" opacity=".13"/>
+      <line x1="${pad}" y1="${base}" x2="${w - pad}" y2="${base}"
+            stroke="var(--muted)" stroke-width="1" stroke-dasharray="4 4"/>
+      <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2"/>
+    </svg>
+    <div class="spark-range">
+      <span>${esc(points[0].date)} · 시작 100</span>
+      <span>${esc(points[points.length - 1].date)} · ${last.toFixed(2)}</span>
+    </div>`;
+}
+
+// 청산 사유별 기여도 — 0을 가운데 두고 좌(손실)/우(이익)로 뻗는 막대
+function reasonRows(rows) {
+  if (!rows || !rows.length) return '';
+  const scale = Math.max(...rows.map(r => Math.abs(r.contribution)), 0.01);
+  const bars = rows.map(r => {
+    const w = Math.abs(r.contribution) / scale * 50;
+    const s = r.contribution >= 0
+      ? `left:50%;width:${w}%;background:var(--up)`
+      : `right:50%;width:${w}%;background:var(--down)`;
+    return `<div class="reason">
+      <span class="rn">${esc(r.reason)}</span>
+      <span class="rc">${r.n}건 · 승률 ${r.win_rate}%</span>
+      <span class="bar"><i style="${s}"></i></span>
+      <span class="rv ${cls(r.contribution)}">${sign(r.contribution)}%</span>
+    </div>`;
+  }).join('');
+  return `<div class="bot-block"><h3>청산 사유별 기여도 (시드 대비)</h3>${bars}</div>`;
+}
+
+function tradeRows(rows) {
+  if (!rows || !rows.length) return '';
+  const tr = rows.map(r => `<tr>
+    <td class="t-date">${esc(r.date.slice(5))}</td>
+    <td class="nm">${esc(r.name || r.ticker)}</td>
+    <td class="t-why">${esc(r.exit_reason)}</td>
+    <td class="t-hold">${r.hold_min == null ? '' : r.hold_min + '분'}</td>
+    <td class="t-num ${cls(r.pnl_pct)}">${sign(r.pnl_pct)}%</td>
+  </tr>`).join('');
+  return `<div class="bot-block"><h3>최근 매매</h3><table class="trades">${tr}</table></div>`;
+}
+
 function bot(d) {
   if (!d) return `<section><h2>paperbot 성과</h2><div class="bot">
-    <div class="stale">아직 노트북에서 요약본을 올린 적이 없다. 노트북에서 push_paperbot_summary.py를 한 번 실행하면 여기에 표시된다.</div>
+    <div class="stale">아직 노트북에서 요약본을 올린 적이 없다. 노트북에서
+      <code>python scripts/push_paperbot_summary.py --push</code>를 한 번 실행하면 여기에 표시된다.</div>
   </div></section>`;
   const t = new Date(d.generated_at);
   const hrs = (Date.now() - t) / 3600000;
   const warn = hrs > 12
     ? `<div class="stale">노트북 요약본이 ${Math.floor(hrs)}시간째 그대로다. 노트북이 꺼져 있거나 봇이 멈췄을 수 있다.</div>` : '';
+  const per = d.period ? ` · ${d.period.from} ~ ${d.period.to} (${d.period.days}거래일)` : '';
+  const today = d.today
+    ? `${d.today.date.slice(5)} ${d.today.trades}건 <span class="${cls(d.today['return'])}">${sign(d.today['return'])}%</span>`
+    : '-';
   return `<section><h2>paperbot 성과</h2><div class="bot">
-    <div style="font-size:12px;color:var(--muted)">${esc(d.mode||'live-mock')} · ${t.toLocaleString('ko-KR')} 기준</div>
+    <div style="font-size:12px;color:var(--muted)">${esc(d.mode || 'live-mock')}${per}</div>
     <div class="bot-grid">
       <div><div class="k">누적 매매</div><div class="v">${d.trades}건</div></div>
       <div><div class="k">승률</div><div class="v">${d.win_rate.toFixed(1)}%</div></div>
-      <div><div class="k">누적 손익률</div><div class="v ${cls(d.total_return)}">${sign(d.total_return)}%</div></div>
+      <div><div class="k">누적 손익률 (시드 대비)</div><div class="v ${cls(d.total_return)}">${sign(d.total_return)}%</div></div>
       <div><div class="k">MDD</div><div class="v ${cls(d.mdd)}">${d.mdd.toFixed(2)}%</div></div>
+    </div>
+    <div class="bot-sub">
+      <div><div class="k">가격 손익</div><div class="v ${cls(d.gross_return)}">${sign(d.gross_return)}%</div></div>
+      <div><div class="k">수수료·세금</div><div class="v down">${sign(d.cost_return)}%</div></div>
+      <div><div class="k">평균 익절</div><div class="v up">${sign(d.avg_win)}%</div></div>
+      <div><div class="k">평균 손절</div><div class="v down">${sign(d.avg_loss)}%</div></div>
+      <div><div class="k">최근 매매일</div><div class="v">${today}</div></div>
+    </div>
+    <div class="bot-block"><h3>자산곡선 (시드 = 100)</h3>${equityChart(d.equity)}</div>
+    ${reasonRows(d.by_reason)}
+    ${tradeRows(d.recent)}
+    <div style="font-size:11px;color:var(--muted);margin-top:14px;line-height:1.6">
+      모의투자(paper) 계좌 기준. 손익률은 전부 수수료 0.7% + 거래세 0.2%를 뺀 순손익이고,
+      금액은 공개하지 않고 시드 대비 %만 표시한다. ${t.toLocaleString('ko-KR')} 기준.
     </div>${warn}
   </div></section>`;
 }

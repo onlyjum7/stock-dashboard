@@ -1,0 +1,220 @@
+{
+  "generated_at": "2026-07-28T22:21:55+09:00",
+  "mode": "live-mock",
+  "trades": 53,
+  "win_rate": 13.21,
+  "total_return": -7.28,
+  "gross_return": -1.71,
+  "cost_return": -5.58,
+  "mdd": -7.28,
+  "avg_win": 2.85,
+  "avg_loss": -2.04,
+  "best": 6.52,
+  "worst": -5.7,
+  "period": {
+    "from": "2026-06-30",
+    "to": "2026-07-28",
+    "days": 13
+  },
+  "today": {
+    "date": "2026-07-28",
+    "trades": 1,
+    "return": -0.6
+  },
+  "equity": [
+    {
+      "date": "2026-06-30",
+      "close": 99.551
+    },
+    {
+      "date": "2026-07-01",
+      "close": 98.948
+    },
+    {
+      "date": "2026-07-13",
+      "close": 98.941
+    },
+    {
+      "date": "2026-07-14",
+      "close": 98.323
+    },
+    {
+      "date": "2026-07-15",
+      "close": 97.964
+    },
+    {
+      "date": "2026-07-16",
+      "close": 97.575
+    },
+    {
+      "date": "2026-07-20",
+      "close": 96.971
+    },
+    {
+      "date": "2026-07-21",
+      "close": 96.274
+    },
+    {
+      "date": "2026-07-22",
+      "close": 94.627
+    },
+    {
+      "date": "2026-07-23",
+      "close": 94.435
+    },
+    {
+      "date": "2026-07-24",
+      "close": 93.426
+    },
+    {
+      "date": "2026-07-27",
+      "close": 93.316
+    },
+    {
+      "date": "2026-07-28",
+      "close": 92.715
+    }
+  ],
+  "recent": [
+    {
+      "date": "2026-07-28",
+      "ticker": "356680",
+      "name": "356680",
+      "exit_reason": "손절",
+      "hold_min": 0,
+      "pnl_pct": -3.53
+    },
+    {
+      "date": "2026-07-27",
+      "ticker": "025560",
+      "name": "025560",
+      "exit_reason": "익절",
+      "hold_min": 3,
+      "pnl_pct": 6.52
+    },
+    {
+      "date": "2026-07-27",
+      "ticker": "039980",
+      "name": "039980",
+      "exit_reason": "트레일링스탑",
+      "hold_min": 1,
+      "pnl_pct": -2.64
+    },
+    {
+      "date": "2026-07-27",
+      "ticker": "039980",
+      "name": "039980",
+      "exit_reason": "트레일링스탑",
+      "hold_min": 5,
+      "pnl_pct": 1.05
+    },
+    {
+      "date": "2026-07-27",
+      "ticker": "099190",
+      "name": "099190",
+      "exit_reason": "트레일링스탑",
+      "hold_min": 3,
+      "pnl_pct": -1.66
+    },
+    {
+      "date": "2026-07-27",
+      "ticker": "176750",
+      "name": "176750",
+      "exit_reason": "손절",
+      "hold_min": 1,
+      "pnl_pct": -3.86
+    },
+    {
+      "date": "2026-07-24",
+      "ticker": "100090",
+      "name": "100090",
+      "exit_reason": "트레일링스탑",
+      "hold_min": 3,
+      "pnl_pct": -3.12
+    },
+    {
+      "date": "2026-07-24",
+      "ticker": "100090",
+      "name": "100090",
+      "exit_reason": "트레일링스탑",
+      "hold_min": 10,
+      "pnl_pct": -1.1
+    },
+    {
+      "date": "2026-07-24",
+      "ticker": "054540",
+      "name": "054540",
+      "exit_reason": "익절",
+      "hold_min": 1,
+      "pnl_pct": 3.21
+    },
+    {
+      "date": "2026-07-24",
+      "ticker": "014940",
+      "name": "014940",
+      "exit_reason": "트레일링스탑",
+      "hold_min": 1,
+      "pnl_pct": -1.09
+    },
+    {
+      "date": "2026-07-24",
+      "ticker": "000520",
+      "name": "000520",
+      "exit_reason": "손절",
+      "hold_min": 1,
+      "pnl_pct": -3.79
+    },
+    {
+      "date": "2026-07-23",
+      "ticker": "234340",
+      "name": "234340",
+      "exit_reason": "트레일링스탑",
+      "hold_min": 3,
+      "pnl_pct": -2.56
+    }
+  ],
+  "by_reason": [
+    {
+      "reason": "트레일링스탑",
+      "n": 21,
+      "win_rate": 9.5,
+      "contribution": -4.41
+    },
+    {
+      "reason": "손절",
+      "n": 9,
+      "win_rate": 0.0,
+      "contribution": -3.89
+    },
+    {
+      "reason": "추세이탈",
+      "n": 7,
+      "win_rate": 0.0,
+      "contribution": -1.5
+    },
+    {
+      "reason": "시간청산",
+      "n": 4,
+      "win_rate": 0.0,
+      "contribution": -0.53
+    },
+    {
+      "reason": "부스러기청소",
+      "n": 7,
+      "win_rate": 0.0,
+      "contribution": -0.02
+    },
+    {
+      "reason": "청산 확인",
+      "n": 1,
+      "win_rate": 100.0,
+      "contribution": 0.0
+    },
+    {
+      "reason": "익절",
+      "n": 4,
+      "win_rate": 100.0,
+      "contribution": 3.06
+    }
+  ]
+}

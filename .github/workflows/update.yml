@@ -29,7 +29,9 @@ jobs:
         run: pip install "yfinance>=0.2.55" "pandas>=2.2"
 
       - name: 계산 로직 테스트
-        run: python scripts/test_fetch_market.py
+        run: |
+          python scripts/test_fetch_market.py
+          python scripts/test_paperbot_summary.py
 
       - name: 시세 수집
         run: python scripts/fetch_market.py

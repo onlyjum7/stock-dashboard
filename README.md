@@ -35,15 +35,22 @@ GitHub Actions (15분마다)          내 노트북 (켜져 있을 때만)
 
 ## paperbot 성과 연결
 
-노트북에서 한 번만 확인:
+노트북에서 실행한다. DB 경로는 기본값이 잡혀 있어 그냥 돌리면 된다.
 
 ```bash
-python scripts/push_paperbot_summary.py --db "C:/경로/trades.db"
+python scripts/push_paperbot_summary.py           # 숫자만 확인
+python scripts/push_paperbot_summary.py --push    # 커밋 + 푸시까지
 ```
 
-숫자가 맞으면 `--push`를 붙여 실제로 올린다.
-매일 자동으로 올리고 싶으면 Windows 작업 스케줄러에 등록하면 된다.
-이 스크립트는 DB를 **읽기 전용**으로만 열고 매매 로직에는 손대지 않는다.
+- 다른 DB를 보려면 `--db "C:/경로/trades.db"`, 전체 모드를 보려면 `--mode ""`.
+- 손익은 `entry_price`/`exit_price`/`qty`에서 직접 계산하고,
+  **매수 0.35% + 매도 0.35% + 거래세 0.20%** 를 뺀 순손익이다
+  (자동매매 쪽 `config.py` 실측 상수와 동일).
+- 누적 손익률·MDD는 **시드 대비 %**. 매매별 수익률을 복리로 곱하면
+  1회 주문이 시드의 20%인 봇에서는 수치가 크게 부풀려지기 때문.
+- 올라가는 JSON에는 **금액(원)·수량·시드가 들어가지 않는다.** 퍼센트와 건수만 나간다.
+- 매일 자동으로 올리고 싶으면 장 마감 후 시각으로 Windows 작업 스케줄러에 등록하면 된다.
+- 이 스크립트는 DB를 **읽기 전용**으로만 열고 매매 로직에는 손대지 않는다.
 
 ## 알아둘 한계
 
