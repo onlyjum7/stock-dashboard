@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-11T16:39:11+09:00",
+  "generated_at": "2026-08-11T17:38:17+09:00",
   "source": "Yahoo Finance (약 15~20분 지연)",
   "portfolio": {
     "positions": [
@@ -16546,10 +16546,10 @@
       "name": "원/달러",
       "ticker": "KRW=X",
       "digits": 2,
-      "price": 1416.72,
+      "price": 1417.03,
       "prev": 1407.0,
-      "change": 9.72,
-      "pct": 0.69,
+      "change": 10.03,
+      "pct": 0.71,
       "history": [
         {
           "date": "2026-02-11",
@@ -17069,7 +17069,7 @@
         },
         {
           "date": "2026-08-11",
-          "close": 1416.72
+          "close": 1417.03
         }
       ]
     },
@@ -17077,10 +17077,10 @@
       "name": "WTI 유가",
       "ticker": "CL=F",
       "digits": 2,
-      "price": 83.65,
+      "price": 84.28,
       "prev": 82.13,
-      "change": 1.52,
-      "pct": 1.85,
+      "change": 2.15,
+      "pct": 2.62,
       "history": [
         {
           "date": "2026-02-04",
@@ -17600,7 +17600,7 @@
         },
         {
           "date": "2026-08-11",
-          "close": 83.65
+          "close": 84.28
         }
       ]
     },
@@ -17608,10 +17608,10 @@
       "name": "달러인덱스",
       "ticker": "DX-Y.NYB",
       "digits": 2,
-      "price": 99.84,
+      "price": 99.877,
       "prev": 99.81,
-      "change": 0.03,
-      "pct": 0.03,
+      "change": 0.067,
+      "pct": 0.07,
       "history": [
         {
           "date": "2026-02-04",
@@ -18131,7 +18131,7 @@
         },
         {
           "date": "2026-08-11",
-          "close": 99.84
+          "close": 99.877
         }
       ]
     }
